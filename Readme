@@ -1,0 +1,40 @@
+Lica Stefan 325CB
+
+Variabile folosite in ambele fisiere sursa:
+`buffer[1000][1000]` - contine datele din fisierul de input, buffer este parcurs si continutul lui este scris in fisierul de output
+`dimMesaj[1000]` - contine marimea fiecarui mesaj in parte
+`receptionat[1000]` - stie daca mesajul cu un anumit index a fost sau nu receptionat fara probleme
+`totalNoMesaje` - reprezinta numarul total de mesaje ce vor fi transmise
+`mesajeConf` - reprezinta numarul total de mesaje confirmate
+
+========================================================================
+
+In `recv.c`:
+
+Am 4 functii ajutatoare:
+	1.`writeBuffer` - in aceasta functie continutul fiecarui mesaj primit este scris in `buffer` pe pozitia indexului mesajului si pe aceesi pozitie in lista `dimMesaj` este salvata marimea mesajului
+	2.`writeFileName` - se creaza fisierul de output
+	3.`writeInFile` - in aceasta functie este scris in fisier intregul continut din `buffer`, dupa ce se termina scrierea se trimite un mesaj de terminare a protocolului
+	4.`updateReceptionat` - in aceasta functie se verifica daca mesajul actual a fost confirmat, daca nu, atunci se trimite mesaj de confirmare si se actualizeaza `receprionat`
+In main programul ruleaza continuu. 
+Initial se scriu in buffer mesajele primite. 
+Se creaza fisierul in care voi scrie datele. 
+Daca exista mesaje de scris in fisierul de output apelez functia `writeInFile`. 
+In final actualizez vectorul `receptionat`.
+
+========================================================================
+
+In `send.c`
+
+Am 2 functii ajutatoare:
+	1.`writeToBuffer` - cat timp am ce citi din fisierul de input, stochez mesajul in buffer, tin minte dimensiunea mesajului si incrementez `totalNoMesaje` care tine minte cate mesaje in total trimit; pe prima pozitie a vectorului `dimMesaj` pun numarul maxim de mesaje, acest numar va fi trimis odata cu numele fisierului
+	2.`sendMessage` - trimite mesajul conform pozitiei in buffer si dimentiunea lui din vectorul de dimensiune
+In main initial calculez marimea ferestrei: `windowSize`.
+Deschid fisierul si apelez functia `writeToBuffer`.
+A sosit momentul in care trebuie sa sa trimit mesaje egal cu marimea ferestrei, exista posibilitatea ca fereastra sa fie mai mare decat numarul total de mesaje. Deci voi trimite mesaje pana sunt consumate toate mesajele stocate.
+Din acest moment send.c ruleaza continuu pana sunt trimise SI confirmate toate mesajele.
+	Daca nu este primit un mesaj de confirmare de la recv.c in 80ms:
+		Caut mesajul care nu a fost confirmat si il mai trimit odata. Acest lucru se va intampla de fiecare daca cand nu primesc confirmarea unui mesaj la timp.
+	Daca mesajul a fost confirmat:
+		Daca indexul mesajului este -1 atunci stiu ca am primit mesajul de terminare a protocolului.
+		Continui cu trimiterea urmatorului mesaj.
